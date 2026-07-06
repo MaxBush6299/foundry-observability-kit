@@ -1,0 +1,33 @@
+// Readiness checks for required signal categories.
+let nowUtc = now();
+let lookback = 24h;
+let tracesReady = toscalar(
+    AppDependencies
+    | where TimeGenerated > ago(lookback)
+    | where tostring(Properties['gen_ai.operation.name']) in ('invoke_agent', 'execute_tool', 'chat')
+    | count
+) > 0;
+let usageReady = toscalar(
+    AzureDiagnostics
+    | where TimeGenerated > ago(lookback)
+    | where Category == 'AzureOpenAIRequestUsage'
+    | count
+) > 0;
+let auditReady = toscalar(
+    AzureDiagnostics
+    | where TimeGenerated > ago(lookback)
+    | where Category == 'Audit'
+    | count
+) > 0;
+let deploymentHealthReady = toscalar(
+    AzureMetrics
+    | where TimeGenerated > ago(lookback)
+    | where MetricName in ('AzureOpenAIRequests', 'ProcessedPromptTokens', 'GeneratedTokens', 'TokenTransaction')
+    | count
+) > 0;
+print
+    evaluatedAtUtc = nowUtc,
+    tracesStatus = iff(tracesReady, 'Ready', 'NotReady'),
+    usageStatus = iff(usageReady, 'Ready', 'NotReady'),
+    auditStatus = iff(auditReady, 'Ready', 'NotReady'),
+    deploymentHealthStatus = iff(deploymentHealthReady, 'Ready', 'NotReady')

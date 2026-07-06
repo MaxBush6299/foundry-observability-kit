@@ -1,0 +1,13 @@
+// Tool call diagnostics with latency and failures.
+AppDependencies
+| where TimeGenerated > ago(24h)
+| where tostring(Properties['gen_ai.operation.name']) == 'execute_tool'
+| extend conversationId = tostring(Properties['gen_ai.conversation.id'])
+| extend agentName = tostring(Properties['gen_ai.agent.name'])
+| extend toolName = tostring(Properties['gen_ai.tool.name'])
+| summarize
+    callCount = count(),
+    failureCount = countif(Success == false),
+    p95DurationMs = percentile(DurationMs, 95)
+  by toolName, agentName, bin(TimeGenerated, 15m), conversationId
+| order by TimeGenerated desc

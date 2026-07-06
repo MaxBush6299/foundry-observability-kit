@@ -1,0 +1,8 @@
+// Access trail across identities and resources.
+AzureDiagnostics
+| where TimeGenerated > ago(30d)
+| where Category == 'Audit'
+| extend actorDisplay = coalesce(tostring(identity_claim_upn_s), tostring(Caller), tostring(identity_claim_oid_g))
+| extend target = coalesce(tostring(Resource), tostring(ResourceId))
+| summarize actions=count() by bin(TimeGenerated, 15m), actorDisplay, target
+| order by TimeGenerated desc

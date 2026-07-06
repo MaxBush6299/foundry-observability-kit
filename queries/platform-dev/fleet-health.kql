@@ -1,0 +1,12 @@
+// Fleet health by agent across recent traffic.
+AppDependencies
+| where TimeGenerated > ago(24h)
+| where tostring(Properties['gen_ai.operation.name']) == 'invoke_agent'
+| extend agentName = tostring(Properties['gen_ai.agent.name'])
+| summarize
+    runCount = count(),
+    failureCount = countif(Success == false),
+    p95LatencyMs = percentile(DurationMs, 95)
+  by agentName, bin(TimeGenerated, 15m)
+| extend failureRatePct = iff(runCount == 0, 0.0, todouble(failureCount) * 100.0 / todouble(runCount))
+| order by TimeGenerated desc

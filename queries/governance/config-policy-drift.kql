@@ -1,0 +1,8 @@
+// Configuration and policy drift indicators from Azure Resource Graph exports or logs.
+AzureDiagnostics
+| where TimeGenerated > ago(7d)
+| where Category in ('Audit', 'Trace')
+| extend operation = coalesce(tostring(OperationName), tostring(operationName_s))
+| where operation has_any ('write', 'delete', 'policy', 'diagnostic', 'workspace')
+| summarize changeCount = count() by Resource, operation, bin(TimeGenerated, 1d)
+| order by TimeGenerated desc

@@ -1,0 +1,9 @@
+// Attribution audit view for governance.
+AzureDiagnostics
+| where TimeGenerated > ago(30d)
+| where Category in ('Audit', 'RequestResponse')
+| extend actorDisplay = coalesce(tostring(identity_claim_upn_s), tostring(Caller), tostring(identity_claim_oid_g))
+| extend action = coalesce(tostring(OperationName), tostring(operationName_s))
+| extend targetAgent = tostring(parse_json(Properties).['gen_ai.agent.name'])
+| project TimeGenerated, actorDisplay, action, targetAgent, Category, Resource, ResultType
+| order by TimeGenerated desc

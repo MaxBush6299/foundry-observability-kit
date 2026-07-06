@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workbook Parameters Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timeRange": {
+      "type": "string",
+      "description": "Workbook time range parameter (for example P1D, P7D)."
+    },
+    "conversationId": {
+      "type": "string",
+      "description": "Optional conversation identifier filter."
+    },
+    "agentId": {
+      "type": "string",
+      "description": "Optional agent identifier filter."
+    },
+    "modelDeploymentName": {
+      "type": "string",
+      "description": "Optional model deployment filter."
+    },
+    "modelPriceMap": {
+      "type": "array",
+      "description": "Directional price map configuration for cost tile.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "modelKey",
+          "inputTokenPricePer1k",
+          "outputTokenPricePer1k",
+          "currencyCode",
+          "assumptionLabel",
+          "effectiveDate"
+        ],
+        "properties": {
+          "modelKey": {
+            "type": "string"
+          },
+          "inputTokenPricePer1k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "outputTokenPricePer1k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "currencyCode": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3
+          },
+          "assumptionLabel": {
+            "type": "string"
+          },
+          "effectiveDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "timeRange",
+    "modelPriceMap"
+  ]
+}

@@ -1,0 +1,12 @@
+// End-to-end waterfall details for a selected conversation.
+let selectedConversationId = '';
+AppDependencies
+| where TimeGenerated > ago(24h)
+| where tostring(Properties['gen_ai.conversation.id']) == selectedConversationId or isempty(selectedConversationId)
+| where tostring(Properties['gen_ai.operation.name']) in ('invoke_agent', 'execute_tool', 'chat')
+| extend operation = tostring(Properties['gen_ai.operation.name'])
+| extend agentName = tostring(Properties['gen_ai.agent.name'])
+| extend toolName = tostring(Properties['gen_ai.tool.name'])
+| extend modelName = tostring(Properties['gen_ai.request.model'])
+| project TimeGenerated, OperationId, ParentId, operation, agentName, toolName, modelName, DurationMs, Success
+| order by TimeGenerated asc

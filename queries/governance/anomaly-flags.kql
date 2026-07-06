@@ -1,0 +1,18 @@
+// Governance anomaly flags for off-hours and volume spikes.
+let baseline =
+    AzureDiagnostics
+    | where TimeGenerated between (ago(14d) .. ago(1d))
+    | where Category in ('Audit', 'RequestResponse')
+    | summarize baselineCount = avg(toint(count())) by hour = hourofday(TimeGenerated);
+let current =
+    AzureDiagnostics
+    | where TimeGenerated > ago(24h)
+    | where Category in ('Audit', 'RequestResponse')
+    | summarize currentCount = count() by hour = hourofday(TimeGenerated), bin(TimeGenerated, 1h);
+current
+| join kind=leftouter baseline on hour
+| extend spikeFactor = iff(baselineCount == 0.0, real(null), todouble(currentCount) / baselineCount)
+| extend offHours = hour < 6 or hour > 20
+| where offHours or spikeFactor > 2.0
+| project TimeGenerated, hour, currentCount, baselineCount, spikeFactor, offHours
+| order by TimeGenerated desc
