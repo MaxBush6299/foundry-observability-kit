@@ -5,5 +5,3 @@ services: {}
 infra:
   provider: bicep
   path: infra
-pipeline:
-  provider: github

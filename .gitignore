@@ -1,8 +1,9 @@
 # ---------------------------------------------------------------------------
 # Azure Developer CLI (azd) / deployment
 # ---------------------------------------------------------------------------
-.azure/
-*.env
+# Ignore everything under .azure (local env state, secrets) except the example.
+# Note: use .azure/* (not .azure/) so the negation below can re-include a file.
+.azure/*
 !.azure/.env.example
 
 # Bicep build output

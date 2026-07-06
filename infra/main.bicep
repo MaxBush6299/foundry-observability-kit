@@ -18,15 +18,30 @@ param existingApplicationInsightsName string = ''
 @description('Name of the Azure OpenAI/Cognitive Services account in this resource group for diagnostics.')
 param cognitiveServicesAccountName string = ''
 
-@description('Minimum retention days for operational signals.')
-@minValue(30)
+@description('Minimum retention days for operational signals. Must be a value Application Insights accepts.')
+@allowed([
+  30
+  60
+  90
+  120
+  180
+  270
+  365
+  550
+  730
+])
 param retentionDays int = 30
 
-@description('Model price map used by workbook directional cost tiles.')
-param modelPriceMap array = []
-
-@description('Optional object IDs for principals that should get shared workbook viewer access.')
+@description('Optional object IDs for principals that should get shared workbook viewer (Reader) access, scoped to the workbooks.')
 param sharedViewerPrincipalObjectIds array = []
+
+@description('Principal type for the shared viewer role assignments.')
+@allowed([
+  'User'
+  'Group'
+  'ServicePrincipal'
+])
+param sharedViewerPrincipalType string = 'User'
 
 module monitoring './monitoring.bicep' = {
   name: 'monitoring'
@@ -54,8 +69,8 @@ module workbooks './workbooks.bicep' = {
     location: location
     appInsightsResourceId: monitoring.outputs.appInsightsResourceId
     workspaceResourceId: monitoring.outputs.workspaceResourceId
-    modelPriceMap: modelPriceMap
     sharedViewerPrincipalObjectIds: sharedViewerPrincipalObjectIds
+    sharedViewerPrincipalType: sharedViewerPrincipalType
   }
 }
 

@@ -278,7 +278,7 @@
         "queryType": 0,
         "resourceType": "microsoft.insights/components",
         "visualization": "table",
-        "title": "Failed dependency calls"
+        "title": "Failed dependency calls (all dependencies, not only agent spans)"
       }
     },
     {

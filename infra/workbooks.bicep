@@ -9,11 +9,18 @@ param appInsightsResourceId string
 @description('Log Analytics workspace resource ID used by workbook queries.')
 param workspaceResourceId string
 
-@description('Price map array for directional cost estimation.')
-param modelPriceMap array = []
-
-@description('Optional object IDs for shared viewer role assignment at resource-group scope.')
+@description('Optional object IDs for shared viewer (Reader) role assignment scoped to the workbooks.')
 param sharedViewerPrincipalObjectIds array = []
+
+@description('Principal type for the shared viewer role assignments.')
+@allowed([
+  'User'
+  'Group'
+  'ServicePrincipal'
+])
+param sharedViewerPrincipalType string = 'User'
+
+var readerRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
 
 resource platformDevWorkbook 'Microsoft.Insights/workbooks@2022-04-01' = {
   name: guid(resourceGroup().id, 'platform-dev-workbook')
@@ -21,12 +28,11 @@ resource platformDevWorkbook 'Microsoft.Insights/workbooks@2022-04-01' = {
   kind: 'shared'
   tags: {
     workspaceResourceId: workspaceResourceId
-    priceMapConfigured: string(length(modelPriceMap) > 0)
   }
   properties: {
     category: 'workbook'
     displayName: 'Foundry Platform/Dev Observability'
-    serializedData: loadTextContent('../workbooks/platform-dev.workbook')
+    serializedData: loadTextContent('../workbooks/platform-dev.workbook.json')
     sourceId: appInsightsResourceId
     version: 'Workbook/1.0'
   }
@@ -38,7 +44,6 @@ resource governanceWorkbook 'Microsoft.Insights/workbooks@2022-04-01' = {
   kind: 'shared'
   tags: {
     workspaceResourceId: workspaceResourceId
-    priceMapConfigured: string(length(modelPriceMap) > 0)
   }
   properties: {
     category: 'workbook'
@@ -49,12 +54,23 @@ resource governanceWorkbook 'Microsoft.Insights/workbooks@2022-04-01' = {
   }
 }
 
-resource sharedViewerAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalObjectId in sharedViewerPrincipalObjectIds: {
-  name: guid(resourceGroup().id, principalObjectId, 'shared-workbook-viewer')
+resource platformViewerAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalObjectId in sharedViewerPrincipalObjectIds: {
+  name: guid(platformDevWorkbook.id, principalObjectId, 'workbook-reader')
+  scope: platformDevWorkbook
   properties: {
     principalId: principalObjectId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')
-    principalType: 'User'
+    roleDefinitionId: readerRoleDefinitionId
+    principalType: sharedViewerPrincipalType
+  }
+}]
+
+resource governanceViewerAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for principalObjectId in sharedViewerPrincipalObjectIds: {
+  name: guid(governanceWorkbook.id, principalObjectId, 'workbook-reader')
+  scope: governanceWorkbook
+  properties: {
+    principalId: principalObjectId
+    roleDefinitionId: readerRoleDefinitionId
+    principalType: sharedViewerPrincipalType
   }
 }]
 

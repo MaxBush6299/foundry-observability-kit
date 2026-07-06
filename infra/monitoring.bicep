@@ -15,8 +15,18 @@ param applicationInsightsResourceId string = ''
 @description('Existing Application Insights component name in this resource group. Used if resource ID is not provided.')
 param existingApplicationInsightsName string = ''
 
-@description('Minimum retention days for workspace tables.')
-@minValue(30)
+@description('Minimum retention days for workspace tables. Must be a value Application Insights accepts.')
+@allowed([
+  30
+  60
+  90
+  120
+  180
+  270
+  365
+  550
+  730
+])
 param retentionDays int = 30
 
 var workspaceName = 'law-${uniqueString(resourceGroup().id)}'
