@@ -1,7 +1,0 @@
-// Model deployment health from Azure metrics.
-AzureMetrics
-| where TimeGenerated > ago(24h)
-| where MetricName in ('AzureOpenAIRequests', 'ProcessedPromptTokens', 'GeneratedTokens', 'TokenTransaction')
-| summarize value=sum(Total) by MetricName, tostring(ResourceId), bin(TimeGenerated, 15m)
-| extend deployment = extract('deployments/([^/]+)', 1, tostring(ResourceId))
-| order by TimeGenerated desc

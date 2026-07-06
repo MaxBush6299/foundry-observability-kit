@@ -1,9 +1,0 @@
-// Multi-agent handoff map by conversation.
-AppDependencies
-| where TimeGenerated > ago(24h)
-| where tostring(Properties['gen_ai.operation.name']) == 'invoke_agent'
-| extend conversationId = tostring(Properties['gen_ai.conversation.id'])
-| extend agentName = tostring(Properties['gen_ai.agent.name'])
-| where isnotempty(conversationId) and isnotempty(agentName)
-| summarize firstSeen=min(TimeGenerated), lastSeen=max(TimeGenerated), invocations=count() by conversationId, agentName
-| order by lastSeen desc

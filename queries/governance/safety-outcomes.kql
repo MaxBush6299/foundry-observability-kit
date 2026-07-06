@@ -1,9 +1,0 @@
-// Safety outcomes trend by category and severity.
-AzureDiagnostics
-| where TimeGenerated > ago(30d)
-| where Category in ('Trace', 'RequestResponse')
-| extend safetyCategory = tostring(parse_json(Properties).safetyCategory)
-| extend severity = tostring(parse_json(Properties).safetySeverity)
-| where isnotempty(safetyCategory)
-| summarize eventCount = count() by bin(TimeGenerated, 1h), safetyCategory, severity
-| order by TimeGenerated desc

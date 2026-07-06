@@ -98,7 +98,6 @@ azure.yaml                 # azd project definition
 infra/                     # Bicep modules (monitoring, diagnostics, workbooks)
 workbooks/                 # Workbook definitions deployed as serializedData
 docs/                      # Prerequisites and deployment/validation guides
-queries/                   # Reference KQL library
 ```
 
 ## Optional
