@@ -91,6 +91,22 @@ Open either workbook from **Application Insights → Workbooks**, or directly by
 
 Use the **TimeRange** pills at the top to rescope every tile.
 
+### Screenshots
+
+Live workbooks reading real Foundry `gen_ai.*` telemetry from Application Insights.
+
+**Platform/Dev workbook** — summary KPIs and per-agent activity:
+
+![Platform/Dev workbook overview: summary KPIs and agent activity](docs/images/platform-dev-overview.png)
+
+**Token usage** — input vs. output tokens per agent and per model, from `chat` spans:
+
+![Platform/Dev workbook token usage by agent and model](docs/images/platform-dev-tokens.png)
+
+**Governance workbook** — attribution ("who ran what") and access trail, with a working TimeRange picker:
+
+![Governance workbook: who ran what and access trail](docs/images/governance-overview.png)
+
 ## Repository layout
 
 ```
